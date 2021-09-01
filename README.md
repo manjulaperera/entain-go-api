@@ -286,3 +286,34 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
   }
 }'
 ```
+
+9. Order by clause is optional
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  }
+}'
+```
+
+8. Specifying the order by direction is also optional. If it's not specified the order direction for that field will be ascending by default.
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "name"
+	  }]
+  }
+}'
+```

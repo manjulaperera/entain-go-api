@@ -18,6 +18,7 @@ service Racing {
 // Request for ListRaces call.
 message ListRacesRequest {
   ListRacesRequestFilter filter = 1;
+  // Order by clause is optional
   optional ListRacesRequestOrderBy order_by = 2;
 }
 
