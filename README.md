@@ -171,7 +171,7 @@ Use following to test the changes mentioned above.
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {}
 }'
 ```
@@ -181,7 +181,7 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingIds": [2, 5, 7]
   }
@@ -193,7 +193,7 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingVisibility": true
   }
@@ -205,7 +205,7 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingVisibility": false
   }
@@ -217,10 +217,72 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingIds": [5, 7],
 	"meetingVisibility": false
+  }
+}'
+```
+
+6. Get all invisible racing meets with meeting ids 5 and 7 ordered by advertised start time in descending order
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [5, 7],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "advertised_start_time",
+		"direction": 1
+	  }]
+  }
+}'
+```
+
+7. Get all invisible racing meets with meeting ids 5 and 7 ordered by multiple fields. In this case by meet name and then by advertised start time in descending order
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [
+	  {
+		"field": "name",
+		"direction": 1
+	  },
+	  {
+		"field": "advertised_start_time",
+		"direction": 1
+	  }]
+  }
+}'
+```
+
+8. Return an error if an invalid column name is given for the order by expression
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "bla_bla",
+		"direction": 1
+	  }]
   }
 }'
 ```

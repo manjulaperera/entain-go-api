@@ -19,7 +19,7 @@ type RacesRepo interface {
 	Init() error
 
 	// List will return a list of races.
-	List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error)
+	List(filter *racing.ListRacesRequestFilter, order_by *racing.ListRacesRequestOrderBy) ([]*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -44,7 +44,7 @@ func (r *racesRepo) Init() error {
 	return err
 }
 
-func (r *racesRepo) List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error) {
+func (r *racesRepo) List(filter *racing.ListRacesRequestFilter, orderBy *racing.ListRacesRequestOrderBy) ([]*racing.Race, error) {
 	var (
 		err   error
 		query string
@@ -54,8 +54,10 @@ func (r *racesRepo) List(filter *racing.ListRacesRequestFilter) ([]*racing.Race,
 	query = getRaceQueries()[racesList]
 
 	query, args = r.applyFilter(query, filter)
+	query = r.applyOrderByClause(query, orderBy)
 
 	rows, err := r.db.Query(query, args...)
+
 	if err != nil {
 		return nil, err
 	}
@@ -120,4 +122,28 @@ func (m *racesRepo) scanRaces(
 	}
 
 	return races, nil
+}
+
+/* This will add an ORDER BY clause to the ListRaces query with the fileds specified in the request and their order by direction
+
+NOTE: It's better to return an error if the client sends an invalid column name in the order by expression.
+		Therefore the validity of the column name is not checked while adding the order by clause.
+		And query execution will fail if atleast one of the order by expressions have an invalid column name.
+*/
+func (r *racesRepo) applyOrderByClause(query string, orderBy *racing.ListRacesRequestOrderBy) string {
+	var expressions []string
+
+	if orderBy == nil {
+		return query
+	}
+
+	if len(orderBy.OrderByFields) > 0 {
+		for _, orderByField := range orderBy.OrderByFields {
+			expressions = append(expressions, orderByField.Field+" "+orderByField.Direction.String())
+		}
+
+		query += " ORDER BY " + strings.Join(expressions, ", ")
+	}
+
+	return query
 }

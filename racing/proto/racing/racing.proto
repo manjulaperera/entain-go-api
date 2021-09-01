@@ -14,6 +14,7 @@ service Racing {
 
 message ListRacesRequest {
   ListRacesRequestFilter filter = 1;
+  optional ListRacesRequestOrderBy order_by = 2;
 }
 
 // Response to ListRaces call.
@@ -27,6 +28,13 @@ message ListRacesRequestFilter {
 
   // Use this filter for filtering the race meets based on their visibility
   optional bool meeting_visibility = 2;
+}
+
+/* An array of order by fileds to be used to order the races list.
+    The list will be ordered in the order the fields appear in this list
+  */
+message ListRacesRequestOrderBy {
+  repeated OrderByField order_by_fields = 1;
 }
 
 /* Resources */
@@ -46,4 +54,21 @@ message Race {
   // AdvertisedStartTime is the time the race is advertised to run.
   google.protobuf.Timestamp advertised_start_time = 6;
 }
+
+// A field with it's sort order to be used as a sort/ order by field in the ListRacesRequest
+message OrderByField {
+  // The field to be used for sorting/ ordering
+  string field = 1;
+
+  // Sort order/ direction of the given field
+  enum Direction {
+    // Ascending order
+    ASC = 0;
+    // Descending order
+    DESC = 1;
+  }
+
+  Direction direction = 2;
+}
+
 
