@@ -22,6 +22,59 @@ entain/
 ├─ README.md
 ```
 
+### Development Environment Setup For Windows Users
+
+1. Setup Linux dev environment in Docker
+
+```powershell
+docker run --name ubuntu-dev -e HOST_IP=10.0.0.8 --expose 3000 -p 3000:3000 -p 9000:9000 -p 8000:8000 -v //E/Manjula/Tests/entain-go-api:/src -t -i tecnickcom/alldev /bin/bash
+```
+
+NOTE: You must replace the `HOST_IP` and the `Manjula/Tests/entain-go-api` path with the correct host ip and path to your source folder respectively
+
+[See this YouTube video if you need detailed instructions](https://www.youtube.com/watch?v=CGCn0b4FOfs)
+
+2. Once the docker container is setup try to attach to it using a new CLI window (in docker) or in a Terminal window in VS code.
+
+List available docker containers and pick the correct container id to attach
+
+```powershell
+docker ps
+```
+
+Then attach the correct docker container 
+
+```powershell
+docker attach b7b9b0000d42
+```
+
+3. Install HomeBrew (Since it's not available in the `tecnickcom/alldev` docker image)
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+```
+
+4. Run these two commands in your terminal to add Homebrew to your PATH
+
+```bash
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /root/.profile
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+```
+	
+5. Install the Homebrew dependencies if you have sudo access
+
+```bash
+sudo apt-get install build-essential
+```
+
+[See here for more information](https://docs.brew.sh/linux)
+	
+6. Install GCC. For this test we need a specific version of it
+
+```bash
+brew install gcc@5
+```
+
 ### Getting Started
 
 1. Install Go (latest).
