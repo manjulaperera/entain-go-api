@@ -118,6 +118,13 @@ func (m *racesRepo) scanRaces(
 
 		race.AdvertisedStartTime = ts
 
+		// This will set Status based on the AdvertisedStartTime. Fake data inserted are not in UTC so we should check the local time.
+		if advertisedStart.After(time.Now()) || advertisedStart.Equal(time.Now()) {
+			race.Status = "OPEN"
+		} else {
+			race.Status = "CLOSED"
+		}
+
 		races = append(races, &race)
 	}
 
