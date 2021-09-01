@@ -28,6 +28,9 @@ message ListRacesResponse {
 // Filter for listing races.
 message ListRacesRequestFilter {
   repeated int64 meeting_ids = 1;
+
+  // Use this filter for filtering the race meets based on their visibility
+  optional bool meeting_visibility = 2;
 }
 
 /* Resources */
