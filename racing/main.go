@@ -3,12 +3,13 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"net"
+
 	"git.neds.sh/matty/entain/racing/db"
 	"git.neds.sh/matty/entain/racing/proto/racing"
 	"git.neds.sh/matty/entain/racing/service"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"net"
 )
 
 var (
@@ -29,7 +30,7 @@ func run() error {
 		return err
 	}
 
-	racingDB, err := sql.Open("sqlite3", "./db/racing.db")
+	racingDB, err := sql.Open("sqlite3", "././db/racing.db")
 	if err != nil {
 		return err
 	}
