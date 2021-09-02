@@ -47,6 +47,7 @@ func (r *sportsRepo) Init() error {
 	return err
 }
 
+// This is used in ListEvents method to return the sports events based on the filter and the order by clause
 func (r *sportsRepo) List(filter *sports.ListEventsRequestFilter, orderBy *sports.ListEventsRequestOrderBy) ([]*sports.Sport, error) {
 	var (
 		err   error
@@ -116,13 +117,13 @@ func (r *sportsRepo) applyFilter(query string, filter *sports.ListEventsRequestF
 func (m *sportsRepo) scanSportsRows(
 	rows *sql.Rows,
 ) ([]*sports.Sport, error) {
-	var sports []*sports.Sport
+	var sportEvents []*sports.Sport
 
 	for rows.Next() {
 		var sport sports.Sport
 		var advertisedStart time.Time
 
-		if err := rows.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &advertisedStart); err != nil {
+		if err := rows.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &sport.HomeTeam, &sport.AwayTeam, &advertisedStart, &sport.BettingClosedTime); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, nil
 			}
@@ -144,10 +145,10 @@ func (m *sportsRepo) scanSportsRows(
 			sport.Status = "CLOSED"
 		}
 
-		sports = append(sports, &sport)
+		sportEvents = append(sportEvents, &sport)
 	}
 
-	return sports, nil
+	return sportEvents, nil
 }
 
 // This will try to read the record from the DB and if successful it'll also set the sport status. Otherwise it'll return an error
@@ -157,7 +158,7 @@ func (m *sportsRepo) scanSportsRow(
 	var sport sports.Sport
 	var advertisedStart time.Time
 
-	if err := row.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &sport.HomeTeam, &sport.AwayTeam, &advertisedStart); err != nil {
+	if err := row.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &sport.HomeTeam, &sport.AwayTeam, &advertisedStart, &sport.BettingClosedTime); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}

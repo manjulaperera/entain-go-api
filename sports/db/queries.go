@@ -5,7 +5,7 @@ const (
 	sportById  = "tuple"
 )
 
-func getRaceQueries() map[string]string {
+func getSportQueries() map[string]string {
 	return map[string]string{
 		sportsList: `
 			SELECT 

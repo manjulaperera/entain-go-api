@@ -26,12 +26,12 @@ func NewSportsService(sportsRepo db.SportsRepo) Sports {
 
 // Get a list of sports with filter and order by clauses
 func (s *sportingService) ListEvents(ctx context.Context, in *sports.ListEventsRequest) (*sports.ListEventsResponse, error) {
-	sports, err := s.sportsRepo.List(in.Filter, in.OrderBy)
+	sportEvents, err := s.sportsRepo.List(in.Filter, in.OrderBy)
 	if err != nil {
 		return nil, err
 	}
 
-	return &sports.ListEventsResponse{Sports: sports}, nil
+	return &sports.ListEventsResponse{Sports: sportEvents}, nil
 }
 
 // Get sport details by id
