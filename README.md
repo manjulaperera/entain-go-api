@@ -340,3 +340,31 @@ curl -X "GET" "http://localhost:8000/v1/races/7" \
 curl -X "GET" "http://localhost:8000/v1/races/700" \
      -H 'Content-Type: application/json'
 ```
+
+11. Get all invisible racing meets with meeting ids 5 and 7 ordered by advertised start time in descending order
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-sports" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [5, 7],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "advertised_start_time",
+		"direction": 1
+	  }]
+  }
+}'
+```
+
+12. Get a sports event by id.
+
+```bash
+curl -X "GET" "http://localhost:8000/v1/sports/7" \
+     -H 'Content-Type: application/json'
+```
+
+NOTE: Both GET and POST endpoints for sports have the same behaviour as the corresponding racing ones. 
