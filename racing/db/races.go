@@ -20,6 +20,9 @@ type RacesRepo interface {
 
 	// List will return a list of races.
 	List(filter *racing.ListRacesRequestFilter, order_by *racing.ListRacesRequestOrderBy) ([]*racing.Race, error)
+
+	// Get race details by id
+	GetRaceById(raceId int64) (*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -63,6 +66,22 @@ func (r *racesRepo) List(filter *racing.ListRacesRequestFilter, orderBy *racing.
 	}
 
 	return r.scanRaces(rows)
+}
+
+// Get a single race by id
+func (r *racesRepo) GetRaceById(raceId int64) (*racing.Race, error) {
+	var (
+		query string
+		args  []interface{}
+	)
+
+	query = getRaceQueries()[raceById]
+
+	args = append(args, raceId)
+
+	row := r.db.QueryRow(query, args...)
+
+	return r.scanRace(row)
 }
 
 func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFilter) (string, []interface{}) {
@@ -129,6 +148,38 @@ func (m *racesRepo) scanRaces(
 	}
 
 	return races, nil
+}
+
+// This will try to read the record from the DB and if successful it'll also set the race status. Otherwise it'll return an error
+func (m *racesRepo) scanRace(
+	row *sql.Row,
+) (*racing.Race, error) {
+	var race racing.Race
+	var advertisedStart time.Time
+
+	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	ts, err := ptypes.TimestampProto(advertisedStart)
+	if err != nil {
+		return nil, err
+	}
+
+	race.AdvertisedStartTime = ts
+
+	// This will set Status based on the AdvertisedStartTime. Fake data inserted are not in UTC so we should check the local time.
+	if advertisedStart.After(time.Now()) || advertisedStart.Equal(time.Now()) {
+		race.Status = "OPEN"
+	} else {
+		race.Status = "CLOSED"
+	}
+
+	return &race, nil
 }
 
 /* This will add an ORDER BY clause to the ListRaces query with the fileds specified in the request and their order by direction

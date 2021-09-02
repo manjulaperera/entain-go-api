@@ -317,3 +317,17 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
   }
 }'
 ```
+
+9. Get a race by id.
+
+```bash
+curl -X "GET" "http://localhost:8000/v1/races/7" \
+     -H 'Content-Type: application/json'
+```
+
+10. Returns null if the race id is not found
+
+```bash
+curl -X "GET" "http://localhost:8000/v1/races/700" \
+     -H 'Content-Type: application/json'
+```
