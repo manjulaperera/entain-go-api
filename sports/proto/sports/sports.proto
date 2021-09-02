@@ -4,18 +4,13 @@ package sports;
 option go_package = "/sports";
 
 import "google/protobuf/timestamp.proto";
-import "google/api/annotations.proto";
 
 service Sports {
-  // ListEvents returns a list of all sports.
-  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse) {
-    option (google.api.http) = { post: "/v1/list-sports", body: "*" };
-  }
+  // ListEvents will return a collection of all sports
+  rpc ListEvents(ListEventsRequest) returns (ListEventsResponse) {}
 
-  // Get race details by id
-  rpc GetSportById(GetSportRequest) returns (GetSportResponse) {
-    option (google.api.http) = { get: "/v1/sports/{id}" };
-  }
+  // Get sport details by id
+  rpc GetSportById(GetSportRequest) returns (GetSportResponse) {}
 }
 
 /* Requests/Responses */
@@ -97,3 +92,5 @@ message OrderByField {
 
   Direction direction = 2;
 }
+
+

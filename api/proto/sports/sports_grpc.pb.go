@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SportsClient interface {
-	// ListSports returns a list of all sports.
-	ListSports(ctx context.Context, in *ListSportsRequest, opts ...grpc.CallOption) (*ListSportsResponse, error)
+	// ListEvents returns a list of all sports.
+	ListEvents(ctx context.Context, in *ListEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error)
 	// Get race details by id
 	GetSportById(ctx context.Context, in *GetSportRequest, opts ...grpc.CallOption) (*GetSportResponse, error)
 }
@@ -32,9 +32,9 @@ func NewSportsClient(cc grpc.ClientConnInterface) SportsClient {
 	return &sportsClient{cc}
 }
 
-func (c *sportsClient) ListSports(ctx context.Context, in *ListSportsRequest, opts ...grpc.CallOption) (*ListSportsResponse, error) {
-	out := new(ListSportsResponse)
-	err := c.cc.Invoke(ctx, "/sports.Sports/ListSports", in, out, opts...)
+func (c *sportsClient) ListEvents(ctx context.Context, in *ListEventsRequest, opts ...grpc.CallOption) (*ListEventsResponse, error) {
+	out := new(ListEventsResponse)
+	err := c.cc.Invoke(ctx, "/sports.Sports/ListEvents", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +54,8 @@ func (c *sportsClient) GetSportById(ctx context.Context, in *GetSportRequest, op
 // All implementations must embed UnimplementedSportsServer
 // for forward compatibility
 type SportsServer interface {
-	// ListSports returns a list of all sports.
-	ListSports(context.Context, *ListSportsRequest) (*ListSportsResponse, error)
+	// ListEvents returns a list of all sports.
+	ListEvents(context.Context, *ListEventsRequest) (*ListEventsResponse, error)
 	// Get race details by id
 	GetSportById(context.Context, *GetSportRequest) (*GetSportResponse, error)
 	mustEmbedUnimplementedSportsServer()
@@ -65,8 +65,8 @@ type SportsServer interface {
 type UnimplementedSportsServer struct {
 }
 
-func (UnimplementedSportsServer) ListSports(context.Context, *ListSportsRequest) (*ListSportsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListSports not implemented")
+func (UnimplementedSportsServer) ListEvents(context.Context, *ListEventsRequest) (*ListEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListEvents not implemented")
 }
 func (UnimplementedSportsServer) GetSportById(context.Context, *GetSportRequest) (*GetSportResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSportById not implemented")
@@ -84,20 +84,20 @@ func RegisterSportsServer(s grpc.ServiceRegistrar, srv SportsServer) {
 	s.RegisterService(&Sports_ServiceDesc, srv)
 }
 
-func _Sports_ListSports_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListSportsRequest)
+func _Sports_ListEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListEventsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SportsServer).ListSports(ctx, in)
+		return srv.(SportsServer).ListEvents(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/sports.Sports/ListSports",
+		FullMethod: "/sports.Sports/ListEvents",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SportsServer).ListSports(ctx, req.(*ListSportsRequest))
+		return srv.(SportsServer).ListEvents(ctx, req.(*ListEventsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,8 +128,8 @@ var Sports_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SportsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ListSports",
-			Handler:    _Sports_ListSports_Handler,
+			MethodName: "ListEvents",
+			Handler:    _Sports_ListEvents_Handler,
 		},
 		{
 			MethodName: "GetSportById",
