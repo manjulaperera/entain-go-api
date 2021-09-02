@@ -1,0 +1,99 @@
+syntax = "proto3";
+package sports;
+
+option go_package = "/sports";
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+service Sports {
+  // ListSports returns a list of all sports.
+  rpc ListSports(ListSportsRequest) returns (ListSportsResponse) {
+    option (google.api.http) = { post: "/v1/list-sports", body: "*" };
+  }
+
+  // Get race details by id
+  rpc GetSportById(GetSportRequest) returns (GetSportResponse) {
+    option (google.api.http) = { get: "/v1/sports/{id}" };
+  }
+}
+
+/* Requests/Responses */
+
+message ListSportsRequest {
+  ListSportsRequestFilter filter = 1;
+  optional ListSportsRequestOrderBy order_by = 2;
+}
+
+// Response to ListSports call.
+message ListSportsResponse {
+  repeated Sport sports = 1;
+}
+
+// Filter for listing sports.
+message ListSportsRequestFilter {
+  repeated int64 meeting_ids = 1;
+
+  // Use this filter for filtering the sport meets based on their visibility
+  optional bool meeting_visibility = 2;
+}
+
+/* An array of order by fileds to be used to order the sports list.
+    The list will be ordered in the order the fields appear in this list
+  */
+message ListSportsRequestOrderBy {
+  repeated OrderByField order_by_fields = 1;
+}
+
+// Request for GetSportById call
+message GetSportRequest {
+  int64 id = 1;
+}
+
+// Response for GetSportById call
+message GetSportResponse {
+  Sport sport = 1;
+}
+
+
+/* Resources */
+
+// A sport resource.
+message Sport {
+  // ID represents a unique identifier for the sport.
+  int64 id = 1;
+  // MeetingID represents a unique identifier for the sports meeting.
+  int64 meeting_id = 2;
+  // Name is the official name given to the sport.
+  string name = 3;
+  // Number represents the number of the sport.
+  int64 number = 4;
+  // Visible represents whether or not the sport is visible.
+  bool visible = 5;
+  // AdvertisedStartTime is the time the sport is advertised to run.
+  google.protobuf.Timestamp advertised_start_time = 6;
+  // Status is a derived field from AdvertisedStartTime. Status = OPEN if AdvertisedStartTime > current local time or it'll be CLOSED
+  string status = 7;
+  // BettingCloseTime is the time the sport is closed for betting.
+  google.protobuf.Timestamp betting_closed_time = 8;
+  // Home team name.
+  string home_team = 9;
+  // Away team name.
+  string away_team = 10;
+}
+
+// A field with it's sort order to be used as a sort/ order by field in the ListSportsRequest
+message OrderByField {
+  // The field to be used for sorting/ ordering
+  string field = 1;
+
+  // Sort order/ direction of the given field
+  enum Direction {
+    // Ascending order
+    ASC = 0;
+    // Descending order
+    DESC = 1;
+  }
+
+  Direction direction = 2;
+}

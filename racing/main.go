@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	grpcEndpoint = flag.String("grpc-endpoint", "localhost:9000", "gRPC server endpoint")
+	grpcEndpoint = flag.String("grpc-racing-endpoint", "localhost:9000", "gRPC server endpoint")
 )
 
 func main() {
@@ -30,7 +30,7 @@ func run() error {
 		return err
 	}
 
-	racingDB, err := sql.Open("sqlite3", "././db/racing.db")
+	racingDB, err := sql.Open("sqlite3", "././db/events.db")
 	if err != nil {
 		return err
 	}

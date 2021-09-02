@@ -102,7 +102,16 @@ go build && ./racing
 ➜ INFO[0000] gRPC server listening on: localhost:9000
 ```
 
-3. In another terminal window, start our api service...
+3. In a terminal window, start our racing service...
+
+```bash
+cd ./sports
+
+go build && ./sports
+➜ INFO[0000] gRPC server listening on: localhost:9001
+```
+
+4. In another terminal window, start our api service...
 
 ```bash
 cd ./api
@@ -111,7 +120,7 @@ go build && ./api
 ➜ INFO[0000] API server listening on: localhost:8000
 ```
 
-4. Make a request for races... 
+5. Make a request for races... 
 
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
@@ -148,9 +157,9 @@ Ideally, we'd like to see you push this repository up to Github/Gitlab/Bitbucket
 
 **Note:**
 
-To aid in proto generation following any changes, you can run `go generate ./...` from `api` and `racing` directories.
+To aid in proto generation following any changes, you can run `go generate ./...` from `api`, `racing` and `sports` directories.
 
-Before you do so, please ensure you have the following installed. You can simply run the following command below in each of `api` and `racing` directories.
+Before you do so, please ensure you have the following installed. You can simply run the following command below in each of `api` and `racing` and `sports` directories.
 
 ```
 go get github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 google.golang.org/genproto/googleapis/api google.golang.org/grpc/cmd/protoc-gen-go-grpc google.golang.org/protobuf/cmd/protoc-gen-go
