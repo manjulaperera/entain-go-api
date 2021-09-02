@@ -157,8 +157,9 @@ func (m *sportsRepo) scanSportsRow(
 ) (*sports.Sport, error) {
 	var sport sports.Sport
 	var advertisedStart time.Time
+	var bettingClosed time.Time
 
-	if err := row.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &sport.HomeTeam, &sport.AwayTeam, &advertisedStart, &sport.BettingClosedTime); err != nil {
+	if err := row.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &sport.HomeTeam, &sport.AwayTeam, &advertisedStart, &bettingClosed); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -172,6 +173,13 @@ func (m *sportsRepo) scanSportsRow(
 	}
 
 	sport.AdvertisedStartTime = ts
+
+	ts2, err2 := ptypes.TimestampProto(bettingClosed)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	sport.BettingClosedTime = ts2
 
 	// This will set Status based on the AdvertisedStartTime. Fake data inserted are not in UTC so we should check the local time.
 	if advertisedStart.After(time.Now()) || advertisedStart.Equal(time.Now()) {

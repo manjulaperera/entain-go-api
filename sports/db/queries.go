@@ -16,7 +16,8 @@ func getSportQueries() map[string]string {
 				visible,
 				home_team,
 				away_team, 
-				advertised_start_time 
+				advertised_start_time,
+				betting_closed_time
 			FROM sports
 		`,
 		sportById: `
@@ -28,7 +29,8 @@ func getSportQueries() map[string]string {
 				visible, 
 				home_team,
 				away_team,
-				advertised_start_time 
+				advertised_start_time,
+				betting_closed_time
 			FROM sports
 			WHERE id= ?
 		`,
