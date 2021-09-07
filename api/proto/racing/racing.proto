@@ -11,6 +11,11 @@ service Racing {
   rpc ListRaces(ListRacesRequest) returns (ListRacesResponse) {
     option (google.api.http) = { post: "/v1/list-races", body: "*" };
   }
+
+  // Get race details by id
+  rpc GetRaceById(GetRaceRequest) returns (GetRaceResponse) {
+    option (google.api.http) = { get: "/v1/races/{id}" };
+  }
 }
 
 /* Requests/Responses */
@@ -42,6 +47,16 @@ message ListRacesRequestOrderBy {
   repeated OrderByField order_by_fields = 1;
 }
 
+// Request for GetRaceById call
+message GetRaceRequest {
+  int64 id = 1;
+}
+
+// Response for GetRaceById call
+message GetRaceResponse {
+  Race race = 1;
+}
+
 /* Resources */
 
 // A race resource.
@@ -58,6 +73,8 @@ message Race {
   bool visible = 5;
   // AdvertisedStartTime is the time the race is advertised to run.
   google.protobuf.Timestamp advertised_start_time = 6;
+  // Status is a derived field from AdvertisedStartTime. Status = OPEN if AdvertisedStartTime > current local time or it'll be CLOSED
+  string status = 7;
 }
 
 // A field with it's sort order to be used as a sort/ order by field in the ListRacesRequest
