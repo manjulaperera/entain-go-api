@@ -102,7 +102,16 @@ go build && ./racing
 ➜ INFO[0000] gRPC server listening on: localhost:9000
 ```
 
-3. In another terminal window, start our api service...
+3. In a terminal window, start our racing service...
+
+```bash
+cd ./sports
+
+go build && ./sports
+➜ INFO[0000] gRPC server listening on: localhost:9001
+```
+
+4. In another terminal window, start our api service...
 
 ```bash
 cd ./api
@@ -111,7 +120,7 @@ go build && ./api
 ➜ INFO[0000] API server listening on: localhost:8000
 ```
 
-4. Make a request for races... 
+5. Make a request for races... 
 
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
@@ -148,9 +157,9 @@ Ideally, we'd like to see you push this repository up to Github/Gitlab/Bitbucket
 
 **Note:**
 
-To aid in proto generation following any changes, you can run `go generate ./...` from `api` and `racing` directories.
+To aid in proto generation following any changes, you can run `go generate ./...` from `api`, `racing` and `sports` directories.
 
-Before you do so, please ensure you have the following installed. You can simply run the following command below in each of `api` and `racing` directories.
+Before you do so, please ensure you have the following installed. You can simply run the following command below in each of `api` and `racing` and `sports` directories.
 
 ```
 go get github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2 google.golang.org/genproto/googleapis/api google.golang.org/grpc/cmd/protoc-gen-go-grpc google.golang.org/protobuf/cmd/protoc-gen-go
@@ -171,7 +180,7 @@ Use following to test the changes mentioned above.
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {}
 }'
 ```
@@ -181,7 +190,7 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingIds": [2, 5, 7]
   }
@@ -193,7 +202,7 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingVisibility": true
   }
@@ -205,7 +214,7 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingVisibility": false
   }
@@ -217,10 +226,145 @@ curl -X "POST" "http://localhost:8000/v1/list-races" \
 ```bash
 curl -X "POST" "http://localhost:8000/v1/list-races" \
      -H 'Content-Type: application/json' \
-     -d $'{
+     -d '{
   "filter": {
 	"meetingIds": [5, 7],
 	"meetingVisibility": false
   }
 }'
 ```
+
+6. Get all invisible racing meets with meeting ids 5 and 7 ordered by advertised start time in descending order
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [5, 7],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "advertised_start_time",
+		"direction": 1
+	  }]
+  }
+}'
+```
+
+7. Get all invisible racing meets with meeting ids 5 and 7 ordered by multiple fields. In this case by meet name and then by advertised start time in descending order
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [
+	  {
+		"field": "name",
+		"direction": 1
+	  },
+	  {
+		"field": "advertised_start_time",
+		"direction": 1
+	  }]
+  }
+}'
+```
+
+8. Return an error if an invalid column name is given for the order by expression
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "bla_bla",
+		"direction": 1
+	  }]
+  }
+}'
+```
+
+9. Order by clause is optional
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  }
+}'
+```
+
+8. Specifying the order by direction is also optional. If it's not specified the order direction for that field will be ascending by default.
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [7, 9],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "name"
+	  }]
+  }
+}'
+```
+
+9. Get a race by id.
+
+```bash
+curl -X "GET" "http://localhost:8000/v1/races/7" \
+     -H 'Content-Type: application/json'
+```
+
+10. Returns null if the race id is not found
+
+```bash
+curl -X "GET" "http://localhost:8000/v1/races/700" \
+     -H 'Content-Type: application/json'
+```
+
+11. Get all invisible racing meets with meeting ids 5 and 7 ordered by advertised start time in descending order
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-sports" \
+     -H 'Content-Type: application/json' \
+     -d '{
+  "filter": {
+	"meetingIds": [5, 7],
+	"meetingVisibility": false
+  },
+  "order_by": {
+	  "order_by_fields": [{
+		"field": "advertised_start_time",
+		"direction": 1
+	  }]
+  }
+}'
+```
+
+12. Get a sports event by id.
+
+```bash
+curl -X "GET" "http://localhost:8000/v1/sports/7" \
+     -H 'Content-Type: application/json'
+```
+
+NOTE: Both GET and POST endpoints for sports have the same behaviour as the corresponding racing ones. 
