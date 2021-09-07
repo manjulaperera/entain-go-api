@@ -162,3 +162,65 @@ go get github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway github.
 - [Google API Design](https://cloud.google.com/apis/design)
 - [Go Modules](https://golang.org/ref/mod)
 - [Ubers Go Style Guide](https://github.com/uber-go/guide/blob/2910ce2e11d0e0cba2cece2c60ae45e3a984ffe5/style.md)
+
+### Test Cases
+Use following to test the changes mentioned above.
+
+1. Get all race meets
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d $'{
+  "filter": {}
+}'
+```
+
+2. Get all race meets with meeting ids 2, 5 and 7
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d $'{
+  "filter": {
+	"meetingIds": [2, 5, 7]
+  }
+}'
+```
+
+3. Get all visible racing meets
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d $'{
+  "filter": {
+	"meetingVisibility": true
+  }
+}'
+```
+
+4. Get all invisible racing meets
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d $'{
+  "filter": {
+	"meetingVisibility": false
+  }
+}'
+```
+
+5. Get all invisible racing meets with meeting ids 5 and 7
+
+```bash
+curl -X "POST" "http://localhost:8000/v1/list-races" \
+     -H 'Content-Type: application/json' \
+     -d $'{
+  "filter": {
+	"meetingIds": [5, 7],
+	"meetingVisibility": false
+  }
+}'
+```
