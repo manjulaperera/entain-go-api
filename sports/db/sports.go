@@ -10,51 +10,52 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	_ "github.com/mattn/go-sqlite3"
 
-	"git.neds.sh/matty/entain/racing/proto/racing"
+	"git.neds.sh/matty/entain/sports/proto/sports"
 )
 
-// RacesRepo provides repository access to races.
-type RacesRepo interface {
-	// Init will initialise our races repository.
+// SportsRepo provides repository access to sports.
+type SportsRepo interface {
+	// Init will initialise our sports repository.
 	Init() error
 
-	// List will return a list of races.
-	List(filter *racing.ListRacesRequestFilter, order_by *racing.ListRacesRequestOrderBy) ([]*racing.Race, error)
+	// List will return a list of sports.
+	List(filter *sports.ListEventsRequestFilter, order_by *sports.ListEventsRequestOrderBy) ([]*sports.Sport, error)
 
-	// Get race details by id
-	GetRaceById(raceId int64) (*racing.Race, error)
+	// Get sport details by id
+	GetSportById(sportId int64) (*sports.Sport, error)
 }
 
-type racesRepo struct {
+type sportsRepo struct {
 	db   *sql.DB
 	init sync.Once
 }
 
-// NewRacesRepo creates a new races repository.
-func NewRacesRepo(db *sql.DB) RacesRepo {
-	return &racesRepo{db: db}
+// NewSportsRepo creates a new sports repository.
+func NewSportsRepo(db *sql.DB) SportsRepo {
+	return &sportsRepo{db: db}
 }
 
-// Init prepares the race repository dummy data.
-func (r *racesRepo) Init() error {
+// Init prepares the sport repository dummy data.
+func (r *sportsRepo) Init() error {
 	var err error
 
 	r.init.Do(func() {
-		// For test/example purposes, we seed the DB with some dummy races.
+		// For test/example purposes, we seed the DB with some dummy sports.
 		err = r.seed()
 	})
 
 	return err
 }
 
-func (r *racesRepo) List(filter *racing.ListRacesRequestFilter, orderBy *racing.ListRacesRequestOrderBy) ([]*racing.Race, error) {
+// This is used in ListEvents method to return the sports events based on the filter and the order by clause
+func (r *sportsRepo) List(filter *sports.ListEventsRequestFilter, orderBy *sports.ListEventsRequestOrderBy) ([]*sports.Sport, error) {
 	var (
 		err   error
 		query string
 		args  []interface{}
 	)
 
-	query = getRaceQueries()[racesList]
+	query = getSportQueries()[sportsList]
 
 	query, args = r.applyFilter(query, filter)
 	query = r.applyOrderByClause(query, orderBy)
@@ -65,26 +66,26 @@ func (r *racesRepo) List(filter *racing.ListRacesRequestFilter, orderBy *racing.
 		return nil, err
 	}
 
-	return r.scanRaces(rows)
+	return r.scanSportsRows(rows)
 }
 
-// Get a single race by id
-func (r *racesRepo) GetRaceById(raceId int64) (*racing.Race, error) {
+// Get a single sport by id
+func (r *sportsRepo) GetSportById(sportId int64) (*sports.Sport, error) {
 	var (
 		query string
 		args  []interface{}
 	)
 
-	query = getRaceQueries()[raceById]
+	query = getSportQueries()[sportById]
 
-	args = append(args, raceId)
+	args = append(args, sportId)
 
 	row := r.db.QueryRow(query, args...)
 
-	return r.scanRace(row)
+	return r.scanSportsRow(row)
 }
 
-func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFilter) (string, []interface{}) {
+func (r *sportsRepo) applyFilter(query string, filter *sports.ListEventsRequestFilter) (string, []interface{}) {
 	var (
 		clauses []string
 		args    []interface{}
@@ -113,16 +114,16 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 	return query, args
 }
 
-func (m *racesRepo) scanRaces(
+func (m *sportsRepo) scanSportsRows(
 	rows *sql.Rows,
-) ([]*racing.Race, error) {
-	var races []*racing.Race
+) ([]*sports.Sport, error) {
+	var sportEvents []*sports.Sport
 
 	for rows.Next() {
-		var race racing.Race
+		var sport sports.Sport
 		var advertisedStart time.Time
 
-		if err := rows.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
+		if err := rows.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &sport.HomeTeam, &sport.AwayTeam, &advertisedStart, &sport.BettingClosedTime); err != nil {
 			if err == sql.ErrNoRows {
 				return nil, nil
 			}
@@ -135,29 +136,30 @@ func (m *racesRepo) scanRaces(
 			return nil, err
 		}
 
-		race.AdvertisedStartTime = ts
+		sport.AdvertisedStartTime = ts
 
 		// This will set Status based on the AdvertisedStartTime. Fake data inserted are not in UTC so we should check the local time.
 		if advertisedStart.After(time.Now()) || advertisedStart.Equal(time.Now()) {
-			race.Status = "OPEN"
+			sport.Status = "OPEN"
 		} else {
-			race.Status = "CLOSED"
+			sport.Status = "CLOSED"
 		}
 
-		races = append(races, &race)
+		sportEvents = append(sportEvents, &sport)
 	}
 
-	return races, nil
+	return sportEvents, nil
 }
 
-// This will try to read the record from the DB and if successful it'll also set the race status. Otherwise it'll return an error
-func (m *racesRepo) scanRace(
+// This will try to read the record from the DB and if successful it'll also set the sport status. Otherwise it'll return an error
+func (m *sportsRepo) scanSportsRow(
 	row *sql.Row,
-) (*racing.Race, error) {
-	var race racing.Race
+) (*sports.Sport, error) {
+	var sport sports.Sport
 	var advertisedStart time.Time
+	var bettingClosed time.Time
 
-	if err := row.Scan(&race.Id, &race.MeetingId, &race.Name, &race.Number, &race.Visible, &advertisedStart); err != nil {
+	if err := row.Scan(&sport.Id, &sport.MeetingId, &sport.Name, &sport.Number, &sport.Visible, &sport.HomeTeam, &sport.AwayTeam, &advertisedStart, &bettingClosed); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -170,25 +172,32 @@ func (m *racesRepo) scanRace(
 		return nil, err
 	}
 
-	race.AdvertisedStartTime = ts
+	sport.AdvertisedStartTime = ts
+
+	ts2, err2 := ptypes.TimestampProto(bettingClosed)
+	if err2 != nil {
+		return nil, err2
+	}
+
+	sport.BettingClosedTime = ts2
 
 	// This will set Status based on the AdvertisedStartTime. Fake data inserted are not in UTC so we should check the local time.
 	if advertisedStart.After(time.Now()) || advertisedStart.Equal(time.Now()) {
-		race.Status = "OPEN"
+		sport.Status = "OPEN"
 	} else {
-		race.Status = "CLOSED"
+		sport.Status = "CLOSED"
 	}
 
-	return &race, nil
+	return &sport, nil
 }
 
-/* This will add an ORDER BY clause to the ListRaces query with the fileds specified in the request and their order by direction
+/* This will add an ORDER BY clause to the ListEvents query with the fileds specified in the request and their order by direction
 
 NOTE: It's better to return an error if the client sends an invalid column name in the order by expression.
 		Therefore the validity of the column name is not checked while adding the order by clause.
 		And query execution will fail if atleast one of the order by expressions have an invalid column name.
 */
-func (r *racesRepo) applyOrderByClause(query string, orderBy *racing.ListRacesRequestOrderBy) string {
+func (r *sportsRepo) applyOrderByClause(query string, orderBy *sports.ListEventsRequestOrderBy) string {
 	var expressions []string
 
 	if orderBy == nil {
